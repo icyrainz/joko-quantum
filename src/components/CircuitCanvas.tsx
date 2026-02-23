@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Stage, Layer, Line, Text, Rect, Circle, Group } from 'react-konva';
 import type Konva from 'konva';
-import { GATE_CATALOG, type Circuit, type CircuitGate } from '../types';
+import { GATE_CATALOG, type Circuit, type CircuitGate, type ExecutionStep } from '../types';
 import FlowAnimation from './FlowAnimation';
 
 // Layout constants
@@ -19,6 +19,10 @@ interface CircuitCanvasProps {
   numQubits: number;
   disabled?: boolean;
   animationEnabled?: boolean;
+  targetStep?: number;
+  executionSteps?: ExecutionStep[];
+  speed?: number;
+  onStepAnimationComplete?: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -284,10 +288,15 @@ export default function CircuitCanvas({
   numQubits,
   disabled = false,
   animationEnabled = false,
+  targetStep = -1,
+  executionSteps = [],
+  speed = 1,
+  onStepAnimationComplete,
 }: CircuitCanvasProps) {
   const containerRef   = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activatingColumn, setActivatingColumn] = useState<number>(-1);
 
   // For 2-qubit gate placement: track the first click
   const [pendingGate, setPendingGate] = useState<{
@@ -585,7 +594,7 @@ export default function CircuitCanvas({
           {circuit.gates.map(gate => {
             const normalizedGateId = normalizeGateId(gate.gateId);
             const selected     = selectedId === gate.id;
-            const highlighted  = gate.column === currentStep;
+            const highlighted  = gate.column === currentStep || gate.column === activatingColumn;
             const color        = gateColor(normalizedGateId);
             const numQ         = gateNumQubits(normalizedGateId);
             const x            = colX(gate.column);
@@ -701,7 +710,18 @@ export default function CircuitCanvas({
             />
           ))}
         </Layer>
-        <FlowAnimation numQubits={numQubits} enabled={animationEnabled} />
+        <FlowAnimation
+          numQubits={numQubits}
+          enabled={animationEnabled}
+          targetStep={targetStep}
+          executionSteps={executionSteps}
+          speed={speed}
+          onStepAnimationComplete={onStepAnimationComplete}
+          onGatePulseStart={(col) => {
+            setActivatingColumn(col);
+            setTimeout(() => setActivatingColumn(-1), (300 / speed));
+          }}
+        />
       </Stage>
 
       {/* Selection hint */}

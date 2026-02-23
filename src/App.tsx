@@ -104,6 +104,8 @@ function groundState(numQubits: number): Complex[] {
 export default function App() {
   const [circuit, setCircuit] = useState<Circuit>(() => loadSavedCircuit());
   const [currentStep, setCurrentStep] = useState<number>(-1);
+  const [targetStep, setTargetStep] = useState<number>(-1); // what animation is heading towards
+  const [displayStep, setDisplayStep] = useState<number>(-1); // what StateInspector shows
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speed, setSpeed] = useState<number>(1);
 
@@ -173,7 +175,11 @@ export default function App() {
     (resetStep: boolean) => {
       setIsPlaying(false);
       stopInterval();
-      if (resetStep) setCurrentStep(-1);
+      if (resetStep) {
+        setCurrentStep(-1);
+        setTargetStep(-1);
+        setDisplayStep(-1);
+      }
     },
     [stopInterval],
   );
@@ -242,34 +248,29 @@ export default function App() {
     };
   }, [applyStepPreset, currentLessonId, currentLessonStepIndex, lessonLoadNonce, loadedLessons]);
 
-  const startInterval = useCallback(() => {
-    stopInterval();
+  // Animation-driven playback: when a step animation completes, advance to next
+  const handleStepAnimationComplete = useCallback(() => {
+    setDisplayStep(targetStep); // sync inspector to completed step
+    setCurrentStep(targetStep);
 
-    const ms = Math.round(1000 / speed);
-    intervalRef.current = setInterval(() => {
-      setCurrentStep((prev) => {
-        const next = prev + 1;
-        if (next >= executionSteps.length) {
-          setIsPlaying(false);
-          stopInterval();
-          return Math.max(-1, executionSteps.length - 1);
-        }
-        return next;
-      });
-    }, ms);
-  }, [executionSteps.length, speed, stopInterval]);
+    if (!isPlaying) return;
 
-  useEffect(() => {
-    if (isPlaying) {
-      startInterval();
-    }
-    return stopInterval;
-  }, [isPlaying, speed, startInterval, stopInterval]);
+    // Advance to next step
+    setTargetStep((prev) => {
+      const next = prev + 1;
+      if (next >= executionSteps.length) {
+        setIsPlaying(false);
+        stopInterval();
+        return prev; // stay at last step
+      }
+      return next;
+    });
+  }, [isPlaying, targetStep, executionSteps.length, stopInterval]);
 
   const displayState: Complex[] = (() => {
     if (executionSteps.length === 0) return groundState(numQubits);
-    if (currentStep < 0) return executionSteps[0].stateBefore;
-    const step = executionSteps[currentStep];
+    if (displayStep < 0) return executionSteps[0]?.stateBefore ?? groundState(numQubits);
+    const step = executionSteps[displayStep];
     return step ? step.stateAfter : groundState(numQubits);
   })();
 
@@ -376,8 +377,15 @@ export default function App() {
     }
 
     if (executionSteps.length === 0) return;
+
     if (currentStep >= executionSteps.length - 1) {
+      // At end — restart from beginning
       setCurrentStep(-1);
+      setDisplayStep(-1);
+      setTargetStep(0);
+    } else {
+      // Start/resume from current position
+      setTargetStep(currentStep + 1);
     }
     setIsPlaying(true);
   }
@@ -385,17 +393,23 @@ export default function App() {
   function handleStep() {
     stopInterval();
     setIsPlaying(false);
-    setCurrentStep((prev) => Math.min(prev + 1, executionSteps.length - 1));
+    const nextStep = Math.min(currentStep + 1, executionSteps.length - 1);
+    setTargetStep(nextStep);
   }
 
   function handleStepBack() {
     stopInterval();
     setIsPlaying(false);
-    setCurrentStep((prev) => Math.max(prev - 1, -1));
+    const prevStep = Math.max(currentStep - 1, -1);
+    setCurrentStep(prevStep);
+    setDisplayStep(prevStep);
+    setTargetStep(prevStep);
   }
 
   function handleReset() {
     stopPlayback(true);
+    setTargetStep(-1);
+    setDisplayStep(-1);
   }
 
   function handleQubitCountChange(nextNumQubits: number) {
@@ -557,6 +571,10 @@ export default function App() {
           numQubits={numQubits}
           disabled={isPlaying}
           animationEnabled={true}
+          targetStep={targetStep}
+          executionSteps={executionSteps}
+          speed={speed}
+          onStepAnimationComplete={handleStepAnimationComplete}
         />
 
         <StateInspector
