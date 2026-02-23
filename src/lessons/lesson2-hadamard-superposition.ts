@@ -236,7 +236,9 @@ The sequence was:
 
 You just observed **quantum interference**. The qubit was in a genuine superposition between steps 1 and 2, with both amplitudes non-zero. But the second H gate exploited the relative phase relationship between those amplitudes to make them cancel on the |1⟩ term and reinforce on the |0⟩ term.
 
-A useful geometric picture: think of the Bloch sphere (a 3D sphere where the poles are |0⟩ and |1⟩). The first H rotates the state from the north pole to the equator. The second H rotates it back to the north pole. The specific rotation axes are chosen so that the equatorial state maps back to |0⟩ exactly. Phase plays the role of the azimuthal angle on the Bloch sphere.`,
+A useful geometric picture: think of the Bloch sphere (a 3D sphere where the poles are |0⟩ and |1⟩). The first H rotates the state from the north pole to the equator. The second H rotates it back to the north pole. The specific rotation axes are chosen so that the equatorial state maps back to |0⟩ exactly. Phase plays the role of the azimuthal angle on the Bloch sphere.
+
+**Look at the Bloch Sphere** in the State Inspector panel — it shows a 2D projection of the qubit's position on the sphere. Step through the circuit and watch the dot move from the north pole (|0⟩) to the equator (|+⟩) and back.`,
       action: {
         type: 'click-play',
         description: 'Click Reset, then click Play. Confirm the final state is |0⟩ at 100%.',

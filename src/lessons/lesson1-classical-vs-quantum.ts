@@ -212,7 +212,9 @@ Now that the X gate is placed, let's execute it. Find the **Step** button in the
 
 After stepping, the simulation cursor moves forward. If you click Step again there are no more gates, so the state will remain unchanged.
 
-You can always click **Reset** to go back to the beginning and try again.`,
+You can always click **Reset** to go back to the beginning and try again.
+
+**Predict before you step:** Based on the matrix multiplication above, what should the State Inspector show after the X gate is applied to |0⟩? Write down your prediction, then click Step to check.`,
       action: {
         type: 'click-step',
         description: 'Click the Step button in the Playback Controls to execute the X gate.',

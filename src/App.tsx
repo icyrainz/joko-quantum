@@ -122,6 +122,7 @@ export default function App() {
   const [lessonLoadError, setLessonLoadError] = useState<string | null>(null);
   const [lessonLoadNonce, setLessonLoadNonce] = useState<number>(0);
 
+  const [executionNonce, setExecutionNonce] = useState<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const numQubits = circuit.numQubits;
@@ -138,9 +139,12 @@ export default function App() {
     [circuit],
   );
 
+  const hasMeasurement = engineCircuit.gates.some(g => g.gateId === 'M');
+
   const executionSteps = useMemo(
     () => executeCircuit(engineCircuit),
-    [engineCircuit],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [engineCircuit, hasMeasurement ? executionNonce : 0],
   );
 
   const currentLesson: Lesson | null = currentLessonId
@@ -272,6 +276,11 @@ export default function App() {
     if (displayStep < 0) return executionSteps[0]?.stateBefore ?? groundState(numQubits);
     const step = executionSteps[displayStep];
     return step ? step.stateAfter : groundState(numQubits);
+  })();
+
+  const displayMeasurementResults = (() => {
+    if (displayStep < 0 || displayStep >= executionSteps.length) return undefined;
+    return executionSteps[displayStep]?.measurementResults;
   })();
 
   const canAdvanceTutorialStep = useMemo(() => {
@@ -410,6 +419,9 @@ export default function App() {
     stopPlayback(true);
     setTargetStep(-1);
     setDisplayStep(-1);
+    if (hasMeasurement) {
+      setExecutionNonce(n => n + 1);
+    }
   }
 
   function handleQubitCountChange(nextNumQubits: number) {
@@ -581,6 +593,7 @@ export default function App() {
           state={displayState}
           numQubits={numQubits}
           isAnimating={isPlaying}
+          measurementResults={displayMeasurementResults}
         />
 
         <TutorialPanel

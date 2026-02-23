@@ -25,6 +25,7 @@ export interface ExecutionStep {
   column: number;
   stateBefore: Complex[];
   stateAfter: Complex[];
+  measurementResults?: Record<number, 0 | 1>;
 }
 
 export const GATE_CATALOG: GateDefinition[] = [
@@ -36,4 +37,5 @@ export const GATE_CATALOG: GateDefinition[] = [
   { gateId: "T", name: "T Gate", symbol: "T", numQubits: 1, description: "π/4 phase", color: "#EC407A" },
   { gateId: "CNOT", name: "CNOT", symbol: "CX", numQubits: 2, description: "Controlled NOT", color: "#5C6BC0" },
   { gateId: "SWAP", name: "SWAP", symbol: "SW", numQubits: 2, description: "Swap qubits", color: "#26A69A" },
+  { gateId: "M", name: "Measure", symbol: "M", numQubits: 1, description: "Measure qubit", color: "#78909C" },
 ];

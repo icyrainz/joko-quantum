@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Complex } from '../types';
+import BlochSphere from './BlochSphere';
 
 interface StateInspectorProps {
   state: Complex[];
   numQubits: number;
   isAnimating: boolean;
+  measurementResults?: Record<number, 0 | 1>;
 }
 
 function magnitude(c: Complex): number {
@@ -47,7 +49,41 @@ function buildKetString(state: Complex[], numQubits: number): string {
   return terms.join(' + ');
 }
 
-export default function StateInspector({ state, numQubits, isAnimating }: StateInspectorProps) {
+function BlochSphereSection({ state, numQubits }: { state: Complex[]; numQubits: number }) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <div style={{ marginTop: '16px' }}>
+      <div
+        style={{
+          fontSize: '11px',
+          color: '#4a6080',
+          marginBottom: '6px',
+          fontWeight: 600,
+          cursor: 'pointer',
+          userSelect: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+        }}
+        onClick={() => setCollapsed(c => !c)}
+      >
+        <span style={{
+          fontSize: '8px',
+          transition: 'transform 0.15s',
+          display: 'inline-block',
+          transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+        }}>
+          ▼
+        </span>
+        Bloch Sphere
+      </div>
+      {!collapsed && <BlochSphere state={state} numQubits={numQubits} />}
+    </div>
+  );
+}
+
+export default function StateInspector({ state, numQubits, isAnimating, measurementResults }: StateInspectorProps) {
   const dim = 2 ** numQubits;
 
   // Ensure state vector has correct dimension (pad with zeros if needed)
@@ -108,6 +144,27 @@ export default function StateInspector({ state, numQubits, isAnimating }: StateI
           </span>
         )}
       </div>
+
+      {/* Measurement results banner */}
+      {measurementResults && Object.keys(measurementResults).length > 0 && (
+        <div style={{
+          padding: '8px 14px',
+          background: '#1a2940',
+          borderBottom: '1px solid #1e2a3a',
+        }}>
+          {Object.entries(measurementResults).map(([qubit, result]) => (
+            <div key={qubit} style={{
+              fontSize: '11px',
+              color: '#e8c84a',
+              fontFamily: 'monospace',
+              fontWeight: 600,
+              padding: '2px 0',
+            }}>
+              Qubit {qubit} measured: |{result}⟩
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Bar chart */}
       <div style={{ padding: '14px', flex: 1, overflowY: 'auto' }}>
@@ -191,6 +248,9 @@ export default function StateInspector({ state, numQubits, isAnimating }: StateI
             ))}
           </div>
         </div>
+
+        {/* Bloch Sphere */}
+        <BlochSphereSection state={paddedState} numQubits={numQubits} />
 
         {/* Divider */}
         <div style={{ borderTop: '1px solid #1e2a3a', margin: '16px 0' }} />

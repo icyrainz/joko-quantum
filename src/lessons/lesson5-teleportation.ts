@@ -108,7 +108,7 @@ This creates (1/√2)(|00⟩ + |11⟩) on qubits 1 and 2.
 - Column 2: CNOT(control=0, target=1)
 - Column 3: H on qubit 0
 
-**Phase 3 — Alice measures qubits 0 and 1** (not shown as a gate — this is a measurement operation that yields classical bits). Alice gets two classical bits: m₀ (from qubit 0) and m₁ (from qubit 1).
+**Phase 3 — Alice measures qubits 0 and 1** (you can place Measure gates from the Gate Palette to see the probabilistic collapse). Alice gets two classical bits: m₀ (from qubit 0) and m₁ (from qubit 1).
 
 **Phase 4 — Bob's corrections (on qubit 2, based on Alice's bits):**
 - If m₁ = 1: apply X to qubit 2
@@ -261,9 +261,11 @@ The circuit that was pre-loaded contains the Bell pair creation (H + CNOT on qub
 
 **After column 3 (H on q0):** The full superposition of all four measurement outcomes, as shown in the regrouping table.
 
-The simulator cannot show you a measurement outcome with corrections (that would require a conditional gate based on a measurement result, which is a more advanced feature). But the state inspector after all four columns shows exactly the entangled superposition we calculated — each of the four |m₀m₁⟩ measurement outcomes, paired with the corresponding state on Bob's qubit.
+The simulator now supports measurement gates — try placing them after column 3 to see Alice's qubits collapse. Each Reset+Play gives a different random outcome, demonstrating the probabilistic nature of measurement. The conditional corrections (X and Z on Bob's qubit based on Alice's results) are not automated, but you can apply them manually after seeing the measurement result.
 
-In a real implementation, Alice would measure her two qubits and call Bob to tell him the results so he could apply his corrections.`,
+In a real implementation, Alice would measure her two qubits and call Bob to tell him the results so he could apply his corrections.
+
+**Predict before you step:** After all four columns execute, how many basis states should have non-zero amplitude? Based on the regrouping table, what probability should each have? Write down your predictions, then click Reset and Play to check.`,
       action: {
         type: 'click-play',
         description: 'Click Reset, then Play. Watch the state evolve through all four columns.',

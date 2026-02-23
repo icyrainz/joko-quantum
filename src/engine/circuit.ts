@@ -13,7 +13,7 @@
 
 import { type Complex } from './complex.ts';
 import { type GateDefinition, GATES, applyGate } from './gates.ts';
-import { createInitialState } from './stateVector.ts';
+import { createInitialState, measure } from './stateVector.ts';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -46,6 +46,8 @@ export interface ExecutionStep {
   stateBefore: Complex[];
   /** State vector immediately after applying these gates. */
   stateAfter: Complex[];
+  /** If any measurements were performed, maps qubit index → outcome (0 or 1). */
+  measurementResults?: Record<number, 0 | 1>;
 }
 
 // ---------------------------------------------------------------------------
@@ -86,8 +88,9 @@ export function executeStep(
   state: Complex[],
   gates: CircuitGate[],
   numQubits: number,
-): Complex[] {
+): { state: Complex[]; measurementResults?: Record<number, 0 | 1> } {
   let currentState = state;
+  let measurementResults: Record<number, 0 | 1> | undefined;
 
   for (const circuitGate of gates) {
     const gateDef: GateDefinition | undefined = GATES[circuitGate.gateId];
@@ -112,10 +115,19 @@ export function executeStep(
       }
     }
 
-    currentState = applyGate(currentState, gateDef.matrix, circuitGate.targetQubits, numQubits);
+    if (gateDef.isNonUnitary) {
+      // Handle measurement: use the measure() function from stateVector
+      const qubitIndex = circuitGate.targetQubits[0];
+      const { result, newState } = measure(currentState, qubitIndex, numQubits);
+      currentState = newState;
+      if (!measurementResults) measurementResults = {};
+      measurementResults[qubitIndex] = result;
+    } else {
+      currentState = applyGate(currentState, gateDef.matrix, circuitGate.targetQubits, numQubits);
+    }
   }
 
-  return currentState;
+  return { state: currentState, measurementResults };
 }
 
 // ---------------------------------------------------------------------------
@@ -143,16 +155,17 @@ export function executeCircuit(circuit: Circuit): ExecutionStep[] {
     if (columnGates.length === 0) continue;
 
     const stateBefore = currentState.map((amp) => ({ ...amp })); // deep copy
-    const stateAfter = executeStep(currentState, columnGates, circuit.numQubits);
+    const result = executeStep(currentState, columnGates, circuit.numQubits);
 
     steps.push({
       column: col,
       gatesApplied: columnGates,
       stateBefore,
-      stateAfter,
+      stateAfter: result.state,
+      ...(result.measurementResults ? { measurementResults: result.measurementResults } : {}),
     });
 
-    currentState = stateAfter;
+    currentState = result.state;
   }
 
   return steps;

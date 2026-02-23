@@ -150,6 +150,76 @@ function SingleGateShape({
   );
 }
 
+interface MeasureGateShapeProps {
+  x: number;
+  y: number;
+  color: string;
+  selected: boolean;
+  highlighted: boolean;
+  onClick: () => void;
+  onRemove: () => void;
+}
+
+function MeasureGateShape({
+  x,
+  y,
+  color,
+  selected,
+  highlighted,
+  onClick,
+  onRemove,
+}: MeasureGateShapeProps) {
+  const hs = GATE_SIZE / 2;
+  const borderColor = selected ? '#fff' : highlighted ? color : color + '99';
+  const bgColor = highlighted ? color + '40' : color + '1a';
+
+  return (
+    <Group
+      x={x}
+      y={y}
+      onClick={onClick}
+      onTap={onClick}
+      onContextMenu={(event) => {
+        event.evt.preventDefault();
+        onRemove();
+      }}
+    >
+      <Rect
+        x={-hs}
+        y={-hs}
+        width={GATE_SIZE}
+        height={GATE_SIZE}
+        fill={bgColor}
+        stroke={borderColor}
+        strokeWidth={selected ? 2 : 1.5}
+        cornerRadius={6}
+        shadowColor={color}
+        shadowBlur={selected || highlighted ? 10 : 0}
+        shadowOpacity={0.6}
+      />
+      {/* Meter arc */}
+      <Line
+        points={[
+          x - hs + 8 - x, y - hs + GATE_SIZE - 12 - y,
+          x - hs + GATE_SIZE / 2 - x, y - hs + 8 - y,
+          x - hs + GATE_SIZE - 8 - x, y - hs + GATE_SIZE - 12 - y,
+        ]}
+        stroke="#ffffff"
+        strokeWidth={2}
+        tension={0.5}
+        lineCap="round"
+      />
+      {/* Meter needle */}
+      <Line
+        points={[0, GATE_SIZE / 2 - 12, 6, -GATE_SIZE / 2 + 10]}
+        stroke="#ffffff"
+        strokeWidth={1.5}
+        lineCap="round"
+      />
+    </Group>
+  );
+}
+
 interface CnotShapeProps {
   controlX: number;
   controlY: number;
@@ -603,6 +673,28 @@ export default function CircuitCanvas({
                 ...circuit,
                 gates: circuit.gates.filter((g) => g.id !== gate.id),
               });
+
+            if (normalizedGateId === 'M') {
+              const qubit = gate.targetQubits[0];
+              return (
+                <MeasureGateShape
+                  key={gate.id}
+                  x={x}
+                  y={wireY(qubit)}
+                  color={color}
+                  selected={selected}
+                  highlighted={highlighted}
+                  onClick={() => {
+                    if (!pendingGate && !disabled) {
+                      setSelectedId(prev => prev === gate.id ? null : gate.id);
+                    }
+                  }}
+                  onRemove={() => {
+                    if (!disabled) removeGate();
+                  }}
+                />
+              );
+            }
 
             if (numQ === 1) {
               const qubit = gate.targetQubits[0];

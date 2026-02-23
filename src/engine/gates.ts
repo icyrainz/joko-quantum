@@ -24,12 +24,14 @@ export interface GateDefinition {
   symbol: string;
   /** 1 for single-qubit gates, 2 for two-qubit gates. */
   numQubits: number;
-  /** Unitary matrix in row-major order.  Size: 2^numQubits × 2^numQubits. */
-  matrix: Complex[][];
+  /** Unitary matrix in row-major order.  Size: 2^numQubits × 2^numQubits. null for non-unitary ops. */
+  matrix: Complex[][] | null;
   /** One-sentence plain-English summary. */
   description: string;
   /** Longer explanation suitable for a tutorial tooltip. */
   detailedDescription: string;
+  /** True for non-unitary operations like measurement. */
+  isNonUnitary?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -209,6 +211,19 @@ export const GATES: Record<string, GateDefinition> = {
       'It can be decomposed into three CNOT gates and is used in quantum circuit ' +
       'routing to move qubit states when direct two-qubit interactions are not available.',
   },
+  M: {
+    name: 'M',
+    symbol: 'M',
+    numQubits: 1,
+    matrix: null,
+    description: 'Measure — collapses the qubit to |0⟩ or |1⟩ probabilistically.',
+    detailedDescription:
+      'Measurement projects the qubit onto the computational basis. ' +
+      'The outcome is probabilistic: P(0) = |α|², P(1) = |β|². ' +
+      'After measurement the qubit is in a definite classical state. ' +
+      'This is a non-unitary operation.',
+    isNonUnitary: true,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -238,10 +253,14 @@ export const GATES: Record<string, GateDefinition> = {
  */
 export function applyGate(
   state: Complex[],
-  gate: Complex[][],
+  gate: Complex[][] | null,
   targetQubits: number[],
   numQubits: number,
 ): Complex[] {
+  if (!gate) {
+    throw new Error('Cannot apply a gate with no matrix (non-unitary operation).');
+  }
+
   const totalStates = 1 << numQubits; // 2^numQubits
   const k = targetQubits.length;       // gate qubit count
   const gateSize = 1 << k;             // 2^k

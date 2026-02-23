@@ -20,6 +20,8 @@ With **two qubits**, the computational basis states are all possible combination
 - **|10⟩** — qubit 0 is 1, qubit 1 is 0
 - **|11⟩** — qubit 0 is 1, qubit 1 is 1
 
+**Notation convention:** In this simulator, qubit 0 is the leftmost digit in the ket label. So |10⟩ means qubit 0 = 1, qubit 1 = 0. This is the "most-significant bit first" convention, the same ordering used in most quantum computing textbooks.
+
 The general two-qubit state is a linear combination of all four:
 
 **|ψ⟩ = α₀₀|00⟩ + α₀₁|01⟩ + α₁₀|10⟩ + α₁₁|11⟩**
@@ -193,7 +195,9 @@ This is still a product state — qubit 0 is in (|0⟩+|1⟩)/√2, qubit 1 is s
 
 The |10⟩ term (control=1, target=0) became |11⟩ (control=1, target flipped to 1). The |00⟩ term was unchanged (control=0).
 
-The two qubits are now entangled. Notice that **neither qubit individually has a well-defined state** — you cannot describe qubit 0 or qubit 1 alone with a single state vector anymore. The state only has meaning as a property of the **pair together**.`,
+The two qubits are now entangled. Notice that **neither qubit individually has a well-defined state** — you cannot describe qubit 0 or qubit 1 alone with a single state vector anymore. The state only has meaning as a property of the **pair together**.
+
+**Predict before you step:** After the H gate on qubit 0, which basis states should have non-zero probability? After the CNOT, which pairs should remain? Write down your predictions, then click Reset and Step twice to check.`,
       action: {
         type: 'click-step',
         description: 'Click Reset, then Step twice. Watch the state inspector change at each step.',
@@ -277,7 +281,7 @@ There are four maximally entangled two-qubit states, collectively called the **B
 
 **|Φ+⟩ = (1/√2)(|00⟩ + |11⟩)** — created by H on qubit 0 then CNOT. The one we just built.
 
-**|Φ-⟩ = (1/√2)(|00⟩ - |11⟩)** — add a Z gate on qubit 0 before or after the H: HZH = X... or simply apply Z after creating |Φ+⟩.
+**|Φ-⟩ = (1/√2)(|00⟩ - |11⟩)** — apply a Z gate to qubit 0 after creating |Φ+⟩. This flips the relative phase: Z on qubit 0 maps |11⟩ → -|11⟩, giving |00⟩ - |11⟩.
 
 **|Ψ+⟩ = (1/√2)(|01⟩ + |10⟩)** — apply X to qubit 1 before the entangling circuit. (Or start from |01⟩.)
 

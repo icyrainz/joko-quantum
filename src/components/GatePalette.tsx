@@ -14,6 +14,7 @@ const MATRIX_TOOLTIPS: Record<string, string> = {
   T: 'T = [[1,0],[0,e^(iπ/4)]]',
   CNOT: 'CNOT maps |10⟩↔|11⟩',
   SWAP: 'SWAP exchanges |01⟩ and |10⟩',
+  M: 'Collapses qubit to |0⟩ or |1⟩',
 };
 
 function GateCard({ gate }: { gate: GateDefinition }) {
@@ -89,8 +90,9 @@ function GateCard({ gate }: { gate: GateDefinition }) {
 }
 
 export default function GatePalette({ disabled }: GatePaletteProps) {
-  const single = GATE_CATALOG.filter(g => g.numQubits === 1);
+  const single = GATE_CATALOG.filter(g => g.numQubits === 1 && g.gateId !== 'M');
   const multi  = GATE_CATALOG.filter(g => g.numQubits > 1);
+  const ops    = GATE_CATALOG.filter(g => g.gateId === 'M');
 
   const sectionLabel: React.CSSProperties = {
     fontSize: '10px',
@@ -126,6 +128,9 @@ export default function GatePalette({ disabled }: GatePaletteProps) {
 
       <div style={{ ...sectionLabel, marginTop: '14px' }}>Multi-Qubit</div>
       {multi.map(g => <GateCard key={g.gateId} gate={g} />)}
+
+      <div style={{ ...sectionLabel, marginTop: '14px' }}>Operations</div>
+      {ops.map(g => <GateCard key={g.gateId} gate={g} />)}
 
       <div style={{ marginTop: 'auto', paddingTop: '16px', fontSize: '10px', color: '#344050', lineHeight: 1.5 }}>
         Drag a gate onto the circuit canvas to place it.
