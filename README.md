@@ -1,73 +1,67 @@
-# React + TypeScript + Vite
+# JokoQuantum
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A visual quantum circuit simulator for learning quantum computing. Build circuits by dragging gates, step through execution, and watch quantum states evolve in real time.
 
-Currently, two official plugins are available:
+**Live:** [jokoquantum.com](https://jokoquantum.com)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **Drag-and-drop circuit editor** — place gates on a canvas with 1–3 qubits
+- **9 quantum gates** — H, X, Y, Z, S, T, CNOT, SWAP, and Measurement
+- **State vector simulation** — accurate 2^n amplitude calculation with complex arithmetic
+- **State visualization** — probability bars, phase coloring, Bloch sphere, and Dirac ket notation
+- **Playback controls** — play, step forward/back, reset, adjustable speed (0.5x–3x)
+- **5 interactive tutorials** (52 steps total) — from classical bits to quantum teleportation
+- **Persistent progress** — circuits and lesson progress saved to localStorage
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tutorials
 
-## Expanding the ESLint configuration
+| # | Lesson | Duration |
+|---|--------|----------|
+| 1 | Classical vs Quantum Bits | 15 min |
+| 2 | Hadamard Gate & Superposition | 20 min |
+| 3 | Phase & Z Gate Family | 18 min |
+| 4 | Two Qubits & Entanglement | 25 min |
+| 5 | Quantum Teleportation | 30 min |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://localhost:5173](http://localhost:5173).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scripts
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server with HMR |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run test` | Run tests |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run lint` | Lint with ESLint |
+
+## Tech Stack
+
+- **React 19** + **TypeScript** — UI
+- **Vite 7** — build tooling
+- **Konva** / **react-konva** — canvas rendering for circuits
+- **Vitest** — testing
+- **Vercel** — hosting and analytics
+
+## Project Structure
+
 ```
+src/
+├── engine/          # Quantum simulation (complex math, gates, state vectors, circuit execution)
+├── components/      # React UI (GatePalette, CircuitCanvas, StateInspector, BlochSphere, etc.)
+├── lessons/         # Tutorial content and lesson loader
+└── types.ts         # Shared TypeScript types
+```
+
+## License
+
+MIT
