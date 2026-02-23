@@ -205,15 +205,16 @@ export default function FlowAnimation({
       const pulseDuration = GATE_PULSE_MS / speedFactor;
       const progress = Math.min(1, elapsed / pulseDuration);
 
-      // Interpolate brightness during pulse
+      // Interpolate brightness during pulse (store interpolated values, restore after sync)
+      const savedBrightness: number[] = [];
       for (let qi = 0; qi < particles.length; qi++) {
         const p = particles[qi];
-        const interpBrightness = p.prevBrightness + (p.brightness - p.prevBrightness) * progress;
-        // Temporarily set brightness for visual update
-        const targetBrightness = p.brightness;
-        p.brightness = interpBrightness;
-        syncVisuals();
-        p.brightness = targetBrightness;
+        savedBrightness[qi] = p.brightness;
+        p.brightness = p.prevBrightness + (p.brightness - p.prevBrightness) * progress;
+      }
+      syncVisuals();
+      for (let qi = 0; qi < particles.length; qi++) {
+        particles[qi].brightness = savedBrightness[qi];
       }
 
       if (progress >= 1) {
@@ -271,10 +272,34 @@ export default function FlowAnimation({
 
     const step = executionSteps[targetStep];
     const destX = colX(step.column);
+    const goingBackward = targetStep < state.lastTargetStep;
+
+    state.lastTargetStep = targetStep;
+
+    if (goingBackward) {
+      // Snap instantly when going backward (step back)
+      const stateAfter = targetStep >= 0 ? executionSteps[targetStep].stateAfter : null;
+      for (let qi = 0; qi < state.particles.length; qi++) {
+        const p = state.particles[qi];
+        p.x = destX;
+        p.trailXs = [];
+        if (stateAfter) {
+          const prob1 = getQubitProbability(stateAfter, qi, numQubits);
+          p.brightness = 0.3 + prob1 * 0.7;
+          p.prevBrightness = p.brightness;
+        } else {
+          p.brightness = 0.3;
+          p.prevBrightness = 0.3;
+        }
+      }
+      state.phase = 'done';
+      syncVisuals();
+      callbackRefs.current.onStepAnimationComplete?.();
+      return;
+    }
 
     state.startX = state.particles[0]?.x ?? WIRE_START_X;
     state.targetX = destX;
-    state.lastTargetStep = targetStep;
 
     const distance = Math.abs(destX - state.startX);
     state.travelDuration = Math.max(100, (distance / TRAVEL_SPEED) * 1000 / speed);
