@@ -1,7 +1,10 @@
 import { StrictMode, Component, type ErrorInfo, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { inject } from '@vercel/analytics';
 import './index.css';
 import App from './App.tsx';
+
+inject();
 
 class AppErrorBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
   constructor(props: { children: ReactNode }) {
