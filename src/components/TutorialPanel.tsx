@@ -485,7 +485,7 @@ export default function TutorialPanel({
             ›
           </button>
           <div style={{ fontSize: '11px', fontWeight: 700, color: '#8899aa', letterSpacing: '0.05em', textTransform: 'uppercase', minWidth: 0 }}>
-            {currentLesson ? 'Tutorial' : 'QuantumFlow'}
+            {currentLesson ? 'Tutorial' : 'JokoQuantum'}
           </div>
         </div>
 
@@ -544,7 +544,7 @@ export default function TutorialPanel({
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', gap: '20px', textAlign: 'center' }}>
           <div style={{ fontSize: '28px' }}>⚛</div>
           <div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#c0d8f0', marginBottom: '8px' }}>Welcome to QuantumFlow</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#c0d8f0', marginBottom: '8px' }}>Welcome to JokoQuantum</div>
             <div style={{ fontSize: '12px', color: '#607090', lineHeight: 1.6 }}>
               Choose a lesson to begin the guided tutorial, or click <strong style={{ color: '#a0b8d0' }}>Free Play</strong> to explore the circuit simulator on your own.
             </div>

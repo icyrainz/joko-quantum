@@ -484,7 +484,7 @@ export default function App() {
               boxShadow: '0 0 12px #4FC3F760',
             }}
           >
-            QF
+            JQ
           </div>
           <span
             style={{
@@ -496,7 +496,7 @@ export default function App() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            QuantumFlow
+            JokoQuantum
           </span>
         </div>
 

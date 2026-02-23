@@ -35,7 +35,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { error: strin
             minHeight: '100vh',
           }}
         >
-          <h2 style={{ margin: '0 0 10px 0', fontSize: 18 }}>QuantumFlow runtime error</h2>
+          <h2 style={{ margin: '0 0 10px 0', fontSize: 18 }}>JokoQuantum runtime error</h2>
           <div style={{ fontSize: 13, lineHeight: 1.6, color: '#c7d2e2', whiteSpace: 'pre-wrap' }}>
             {this.state.error}
           </div>

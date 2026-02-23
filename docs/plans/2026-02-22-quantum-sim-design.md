@@ -1,4 +1,4 @@
-# QuantumFlow — Visual Quantum Circuit Simulator
+# JokoQuantum — Visual Quantum Circuit Simulator
 
 **Date:** 2026-02-22
 **Status:** Approved

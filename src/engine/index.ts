@@ -1,5 +1,5 @@
 /**
- * QuantumFlow Engine — public API
+ * JokoQuantum Engine — public API
  *
  * Import everything you need from this single entry point:
  *

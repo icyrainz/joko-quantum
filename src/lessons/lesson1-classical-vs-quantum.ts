@@ -8,8 +8,8 @@ export const lesson1: Lesson = {
   prerequisites: [],
   steps: [
     {
-      title: 'Welcome to QuantumFlow',
-      content: `## Welcome to QuantumFlow
+      title: 'Welcome to JokoQuantum',
+      content: `## Welcome to JokoQuantum
 
 This simulator will guide you through the core ideas of quantum computing by letting you build and run real quantum circuits — no physics degree required.
 
