@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Stage, Layer, Line, Text, Rect, Circle, Group } from 'react-konva';
 import type Konva from 'konva';
 import { GATE_CATALOG, type Circuit, type CircuitGate } from '../types';
+import FlowAnimation from './FlowAnimation';
 
 // Layout constants
 const WIRE_START_X   = 60;   // x where wires begin (after labels)
@@ -17,6 +18,7 @@ interface CircuitCanvasProps {
   currentStep: number;      // column index being highlighted (-1 = none)
   numQubits: number;
   disabled?: boolean;
+  animationEnabled?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +283,7 @@ export default function CircuitCanvas({
   currentStep,
   numQubits,
   disabled = false,
+  animationEnabled = false,
 }: CircuitCanvasProps) {
   const containerRef   = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
@@ -698,6 +701,7 @@ export default function CircuitCanvas({
             />
           ))}
         </Layer>
+        <FlowAnimation numQubits={numQubits} enabled={animationEnabled} />
       </Stage>
 
       {/* Selection hint */}

@@ -556,6 +556,7 @@ export default function App() {
           currentStep={highlightColumn}
           numQubits={numQubits}
           disabled={isPlaying}
+          animationEnabled={true}
         />
 
         <StateInspector
