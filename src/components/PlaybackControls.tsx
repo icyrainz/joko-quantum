@@ -23,23 +23,66 @@ const BTN_BASE: React.CSSProperties = {
   outline: 'none',
 };
 
+/* Inline SVG icons – crisp, perfectly centered, no dependencies */
+function StopIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="6" width="12" height="12" rx="1.5" />
+    </svg>
+  );
+}
+
+function SkipBackIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <rect x="5" y="5" width="2.5" height="14" rx="0.75" />
+      <path d="M19 5.5v13a1 1 0 0 1-1.54.84l-9.5-6.5a1 1 0 0 1 0-1.68l9.5-6.5A1 1 0 0 1 19 5.5z" />
+    </svg>
+  );
+}
+
+function PlayIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5.5v13a1 1 0 0 0 1.54.84l10-6.5a1 1 0 0 0 0-1.68l-10-6.5A1 1 0 0 0 8 5.5z" />
+    </svg>
+  );
+}
+
+function PauseIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="5" width="4" height="14" rx="1" />
+      <rect x="14" y="5" width="4" height="14" rx="1" />
+    </svg>
+  );
+}
+
+function SkipForwardIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <rect x="16.5" y="5" width="2.5" height="14" rx="0.75" />
+      <path d="M5 5.5v13a1 1 0 0 0 1.54.84l9.5-6.5a1 1 0 0 0 0-1.68l-9.5-6.5A1 1 0 0 0 5 5.5z" />
+    </svg>
+  );
+}
+
 function IconBtn({
   label,
-  emoji,
+  icon,
   onClick,
   accent,
   size = 'md',
   disabled,
 }: {
   label: string;
-  emoji: string;
+  icon: React.ReactNode;
   onClick: () => void;
   accent?: boolean;
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 }) {
   const dim  = size === 'lg' ? 44 : size === 'md' ? 38 : 32;
-  const fs   = size === 'lg' ? 20 : size === 'md' ? 17 : 14;
   const bg   = accent
     ? 'linear-gradient(135deg, #1a6adc 0%, #0f4ba0 100%)'
     : '#1a2540';
@@ -55,7 +98,6 @@ function IconBtn({
         ...BTN_BASE,
         width: dim,
         height: dim,
-        fontSize: fs,
         background: disabled ? '#111820' : bg,
         color: disabled ? '#2a3a50' : '#e0e8f0',
         boxShadow: disabled ? 'none' : shadow,
@@ -63,7 +105,7 @@ function IconBtn({
         cursor: disabled ? 'not-allowed' : 'pointer',
       }}
     >
-      {emoji}
+      {icon}
     </button>
   );
 }
@@ -115,17 +157,17 @@ export default function PlaybackControls({
 
       {/* Centre: transport controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <IconBtn label="Reset" emoji="⏹" onClick={onReset} disabled={atStart && !isPlaying} />
-        <IconBtn label="Step back" emoji="⏮" onClick={onStepBack} disabled={atStart} />
+        <IconBtn label="Reset" icon={<StopIcon size={18} />} onClick={onReset} disabled={atStart && !isPlaying} />
+        <IconBtn label="Step back" icon={<SkipBackIcon size={18} />} onClick={onStepBack} disabled={atStart} />
         <IconBtn
           label={isPlaying ? 'Pause' : 'Play'}
-          emoji={isPlaying ? '⏸' : '▶'}
+          icon={isPlaying ? <PauseIcon size={22} /> : <PlayIcon size={22} />}
           onClick={onPlayPause}
           accent={!isPlaying}
           size="lg"
           disabled={totalSteps === 0}
         />
-        <IconBtn label="Step forward" emoji="⏭" onClick={onStep} disabled={atEnd} />
+        <IconBtn label="Step forward" icon={<SkipForwardIcon size={18} />} onClick={onStep} disabled={atEnd} />
       </div>
 
       {/* Right: speed control */}
