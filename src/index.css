@@ -15,8 +15,8 @@
   --qf-blue-light:  #4FC3F7;
 
   /* Typography */
-  --qf-font:        system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-  --qf-font-mono:   "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
+  --qf-font:        "Outfit", system-ui, -apple-system, "Segoe UI", Helvetica, sans-serif;
+  --qf-font-mono:   "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
 
   font-family: var(--qf-font);
   font-size: 14px;
@@ -46,27 +46,82 @@ html, body, #root {
   overflow: hidden;
 }
 
-/* Scrollbars */
+/* =========================================================
+   Keyframe Animations
+   ========================================================= */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px #4FC3F740; }
+  50%      { opacity: 0.7; box-shadow: 0 0 10px #4FC3F780; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes softGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px #4FC3F740); }
+  50%      { filter: drop-shadow(0 0 12px #4FC3F770); }
+}
+
+@keyframes barReveal {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* =========================================================
+   Scrollbars
+   ========================================================= */
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--qf-canvas-bg);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a3a50;
-  border-radius: 3px;
+  background: #2a3a5080;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #3a5070;
 }
 
-/* Range inputs */
+/* =========================================================
+   Range inputs
+   ========================================================= */
+
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
+  height: 3px;
   border-radius: 2px;
   background: #1e2a3a;
   cursor: pointer;
@@ -78,22 +133,32 @@ input[type="range"]::-webkit-slider-thumb {
   height: 14px;
   border-radius: 50%;
   background: var(--qf-blue);
-  box-shadow: 0 0 6px var(--qf-blue);
+  box-shadow: 0 0 6px var(--qf-blue), 0 0 0 3px #3a7bd520;
   cursor: pointer;
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.2s, transform 0.15s;
 }
 input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 12px var(--qf-blue-light);
+  box-shadow: 0 0 12px var(--qf-blue-light), 0 0 0 4px #4FC3F720;
+  transform: scale(1.1);
+}
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(0.95);
 }
 
-/* Button base reset (components use inline styles on top of this) */
+/* =========================================================
+   Button base
+   ========================================================= */
+
 button {
   font-family: var(--qf-font);
   cursor: pointer;
-  transition: opacity 0.15s, background 0.15s;
+  transition: opacity 0.15s, background 0.15s, transform 0.1s, box-shadow 0.2s;
 }
 button:disabled {
   cursor: not-allowed;
+}
+button:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
 /* Focus rings */
@@ -102,13 +167,31 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* Smooth opacity transitions on interactive elements */
+/* Smooth transitions on interactive elements */
 button,
 [draggable] {
-  transition: opacity 0.15s, transform 0.1s;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
 }
 
 /* Ensure Konva canvas fills its container properly */
 canvas {
   display: block;
+}
+
+/* =========================================================
+   Dot-grid background pattern (used on panels)
+   ========================================================= */
+
+.qf-dotgrid {
+  background-image: radial-gradient(circle, #ffffff06 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* =========================================================
+   Selection styling
+   ========================================================= */
+
+::selection {
+  background: #3a7bd540;
+  color: #e0f0ff;
 }

@@ -457,13 +457,14 @@ export default function App() {
         style={{
           height: '54px',
           flexShrink: 0,
-          background: '#0f3460',
+          background: 'linear-gradient(180deg, #122448 0%, #0f3460 100%)',
           borderBottom: '1px solid #1e3a5a',
           display: 'flex',
           alignItems: 'center',
           padding: '0 20px',
           gap: '20px',
-          boxShadow: '0 2px 12px #00000060',
+          boxShadow: '0 2px 20px #00000050, inset 0 -1px 0 #4FC3F710',
+          animation: 'fadeIn 0.4s ease-out',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -473,16 +474,17 @@ export default function App() {
             width={28}
             height={28}
             style={{
-              borderRadius: '4px',
-              filter: 'drop-shadow(0 0 8px #4FC3F760)',
+              borderRadius: '6px',
+              animation: 'softGlow 3s ease-in-out infinite',
             }}
           />
           <span
             style={{
               fontSize: '18px',
               fontWeight: 700,
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(90deg, #e0f0ff 0%, #4FC3F7 100%)',
+              letterSpacing: '-0.03em',
+              background: 'linear-gradient(90deg, #ffffff 0%, #b8e0ff 40%, #4FC3F7 100%)',
+              backgroundSize: '200% auto',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
@@ -552,12 +554,12 @@ export default function App() {
 
         <div style={{ width: '1px', height: '24px', background: '#1e4a7a' }} />
 
-        <div style={{ fontSize: '12px', color: '#3a6080' }}>
-          {circuit.gates.length} gate{circuit.gates.length !== 1 ? 's' : ''}
-          {' · '}
-          {executionSteps.length} step{executionSteps.length !== 1 ? 's' : ''}
-          {' · '}
-          {completedLessons}/{LESSON_CATALOG.length} lessons complete
+        <div style={{ fontSize: '12px', color: '#3a6080', fontFamily: 'var(--qf-font-mono)', fontWeight: 500, letterSpacing: '-0.02em' }}>
+          <span style={{ color: '#4a7090' }}>{circuit.gates.length}</span> gate{circuit.gates.length !== 1 ? 's' : ''}
+          <span style={{ color: '#2a4a60', margin: '0 6px' }}>/</span>
+          <span style={{ color: '#4a7090' }}>{executionSteps.length}</span> step{executionSteps.length !== 1 ? 's' : ''}
+          <span style={{ color: '#2a4a60', margin: '0 6px' }}>/</span>
+          <span style={{ color: '#4a7090' }}>{completedLessons}/{LESSON_CATALOG.length}</span> lessons
         </div>
 
         <div style={{ flex: 1 }} />

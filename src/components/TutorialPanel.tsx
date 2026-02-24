@@ -255,7 +255,7 @@ function ActionBox({ step }: { step: LessonStep }) {
       background: isPassive ? '#0d1a2e' : '#0a1e30',
       borderRadius: '0 6px 6px 0',
     }}>
-      <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#4FC3F7', marginBottom: '5px' }}>
+      <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#4FC3F7', marginBottom: '5px', fontFamily: 'var(--qf-font-mono)' }}>
         {label}
       </div>
       <div style={{ fontSize: '13px', color: '#d0e4f4', lineHeight: 1.5 }}>
@@ -300,7 +300,7 @@ function LessonMenu({ lessonSummaries, currentLessonId, onSelect, onClose }: Les
       zIndex: 100,
       overflow: 'hidden',
     }}>
-      <div style={{ padding: '10px 14px 6px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#4a6080' }}>
+      <div style={{ padding: '10px 14px 6px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#4a6080', fontFamily: 'var(--qf-font-mono)' }}>
         Select a Lesson
       </div>
       {lessonSummaries.map((lesson, idx) => {
@@ -484,7 +484,7 @@ export default function TutorialPanel({
           >
             ›
           </button>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#8899aa', letterSpacing: '0.05em', textTransform: 'uppercase', minWidth: 0 }}>
+          <div style={{ fontSize: '10px', fontWeight: 700, color: '#5a7a98', letterSpacing: '0.12em', textTransform: 'uppercase', minWidth: 0, fontFamily: 'var(--qf-font-mono)' }}>
             {currentLesson ? 'Tutorial' : 'JokoQuantum'}
           </div>
         </div>

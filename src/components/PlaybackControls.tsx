@@ -15,15 +15,15 @@ const BTN_BASE: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   border: 'none',
-  borderRadius: '8px',
+  borderRadius: '10px',
   cursor: 'pointer',
   fontFamily: 'inherit',
   fontWeight: 600,
-  transition: 'background 0.15s, box-shadow 0.15s',
+  transition: 'background 0.15s, box-shadow 0.2s, transform 0.1s',
   outline: 'none',
 };
 
-/* Inline SVG icons – crisp, perfectly centered, no dependencies */
+/* Inline SVG icons */
 function StopIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -82,11 +82,11 @@ function IconBtn({
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 }) {
-  const dim  = size === 'lg' ? 44 : size === 'md' ? 38 : 32;
+  const dim  = size === 'lg' ? 44 : size === 'md' ? 36 : 30;
   const bg   = accent
-    ? 'linear-gradient(135deg, #1a6adc 0%, #0f4ba0 100%)'
+    ? 'linear-gradient(135deg, #2070d8 0%, #1558b8 100%)'
     : '#1a2540';
-  const shadow = accent ? '0 0 14px #3a7bd560' : 'none';
+  const shadow = accent ? '0 0 16px #3a7bd550, 0 2px 8px #00000030' : 'none';
 
   return (
     <button
@@ -101,12 +101,57 @@ function IconBtn({
         background: disabled ? '#111820' : bg,
         color: disabled ? '#2a3a50' : '#e0e8f0',
         boxShadow: disabled ? 'none' : shadow,
-        border: accent ? '1px solid #3a7bd570' : '1px solid #1e2a3a',
+        border: accent ? '1px solid #3a7bd560' : '1px solid #1e2a3a',
         cursor: disabled ? 'not-allowed' : 'pointer',
       }}
     >
       {icon}
     </button>
+  );
+}
+
+function ProgressTimeline({ currentStep, totalSteps, isPlaying }: { currentStep: number; totalSteps: number; isPlaying: boolean }) {
+  if (totalSteps === 0) return null;
+
+  const progress = totalSteps > 0 ? Math.max(0, (currentStep + 1) / totalSteps) * 100 : 0;
+
+  return (
+    <div style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '2px',
+      background: '#1e2a3a',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        height: '100%',
+        width: `${progress}%`,
+        background: isPlaying
+          ? 'linear-gradient(90deg, #3a7bd5, #4FC3F7)'
+          : '#3a7bd5',
+        borderRadius: '0 1px 1px 0',
+        transition: 'width 0.3s ease',
+        boxShadow: progress > 0 ? '0 0 8px #4FC3F740' : 'none',
+      }} />
+      {/* Step markers */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '100%',
+        display: 'flex',
+      }}>
+        {Array.from({ length: totalSteps }, (_, i) => (
+          <div key={i} style={{
+            flex: 1,
+            borderRight: i < totalSteps - 1 ? '1px solid #0d111740' : 'none',
+          }} />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -129,36 +174,49 @@ export default function PlaybackControls({
   return (
     <div
       style={{
-        height: '60px',
-        background: '#16213e',
+        height: '58px',
+        background: 'linear-gradient(180deg, #182840 0%, #16213e 100%)',
         borderTop: '1px solid #1e2a3a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '10px',
+        gap: '8px',
         padding: '0 24px',
         flexShrink: 0,
         position: 'relative',
+        animation: 'slideInUp 0.4s ease-out',
       }}
     >
+      <ProgressTimeline currentStep={currentStep} totalSteps={totalSteps} isPlaying={isPlaying} />
+
       {/* Left: step counter */}
       <div style={{
         position: 'absolute',
         left: '20px',
-        fontSize: '12px',
-        fontFamily: 'monospace',
-        color: '#4a6080',
+        fontSize: '11px',
+        fontFamily: 'var(--qf-font-mono)',
+        fontWeight: 500,
+        color: '#3a5a78',
         minWidth: '80px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
       }}>
-        {totalSteps > 0
-          ? `Step ${displayStep} / ${displayTotal}`
-          : 'No steps'}
+        {totalSteps > 0 ? (
+          <>
+            <span style={{ color: '#5a8ab0' }}>{displayStep}</span>
+            <span style={{ color: '#2a3a50' }}>/</span>
+            <span>{displayTotal}</span>
+          </>
+        ) : (
+          <span style={{ color: '#2a3a50', fontStyle: 'italic' }}>No steps</span>
+        )}
       </div>
 
       {/* Centre: transport controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <IconBtn label="Reset" icon={<StopIcon size={18} />} onClick={onReset} disabled={atStart && !isPlaying} />
-        <IconBtn label="Step back" icon={<SkipBackIcon size={18} />} onClick={onStepBack} disabled={atStart} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <IconBtn label="Reset" icon={<StopIcon size={16} />} onClick={onReset} disabled={atStart && !isPlaying} size="sm" />
+        <IconBtn label="Step back" icon={<SkipBackIcon size={16} />} onClick={onStepBack} disabled={atStart} size="sm" />
         <IconBtn
           label={isPlaying ? 'Pause' : 'Play'}
           icon={isPlaying ? <PauseIcon size={22} /> : <PlayIcon size={22} />}
@@ -167,7 +225,7 @@ export default function PlaybackControls({
           size="lg"
           disabled={totalSteps === 0}
         />
-        <IconBtn label="Step forward" icon={<SkipForwardIcon size={18} />} onClick={onStep} disabled={atEnd} />
+        <IconBtn label="Step forward" icon={<SkipForwardIcon size={16} />} onClick={onStep} disabled={atEnd} size="sm" />
       </div>
 
       {/* Right: speed control */}
@@ -178,8 +236,8 @@ export default function PlaybackControls({
         alignItems: 'center',
         gap: '10px',
       }}>
-        <span style={{ fontSize: '11px', color: '#3a5070', whiteSpace: 'nowrap' }}>
-          Speed
+        <span style={{ fontSize: '10px', color: '#2a4060', fontWeight: 500, whiteSpace: 'nowrap', fontFamily: 'var(--qf-font-mono)' }}>
+          SPEED
         </span>
         <input
           type="range"
@@ -188,13 +246,14 @@ export default function PlaybackControls({
           step={0.25}
           value={speed}
           onChange={e => onSpeedChange(Number(e.target.value))}
-          style={{ width: '90px', accentColor: '#3a7bd5' }}
+          style={{ width: '80px', accentColor: '#3a7bd5' }}
         />
         <span style={{
-          fontSize: '12px',
-          fontFamily: 'monospace',
-          color: '#5a7fa0',
-          width: '32px',
+          fontSize: '11px',
+          fontFamily: 'var(--qf-font-mono)',
+          fontWeight: 600,
+          color: '#4a7090',
+          width: '36px',
           textAlign: 'right',
         }}>
           {speed.toFixed(2)}x
