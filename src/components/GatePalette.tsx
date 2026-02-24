@@ -73,7 +73,14 @@ function GateCard({ gate }: { gate: GateDefinition }) {
           fontFamily: 'monospace',
         }}
       >
-        {gate.symbol}
+        {gate.gateId === 'M' ? (
+          <svg viewBox="-19 -19 38 38" width="24" height="24" fill="none">
+            <path d="M-11 7C-10 5.5-2-11 0-11C2-11 10 5.5 11 7" stroke={gate.color} strokeWidth="2" strokeLinecap="round" />
+            <line x1="0" y1="7" x2="6" y2="-9" stroke={gate.color} strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        ) : (
+          gate.symbol
+        )}
       </div>
 
       {/* Text info */}
