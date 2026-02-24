@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Stage, Layer, Line, Text, Rect, Circle, Group } from 'react-konva';
-import type Konva from 'konva';
+import Konva from 'konva';
 import { GATE_CATALOG, type Circuit, type CircuitGate, type ExecutionStep } from '../types';
 import FlowAnimation from './FlowAnimation';
 
@@ -381,6 +381,13 @@ export default function CircuitCanvas({
   // Gate currently being dragged
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
+  // Track in-flight snap tween for cleanup
+  const activeTweenRef = useRef<Konva.Tween | null>(null);
+
+  // Live ref for circuit so tween onFinish always uses current state
+  const circuitRef = useRef(circuit);
+  useEffect(() => { circuitRef.current = circuit; }, [circuit]);
+
   // Resize observer
   useEffect(() => {
     const el = containerRef.current;
@@ -425,6 +432,15 @@ export default function CircuitCanvas({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [disabled, selectedId, circuit, onCircuitChange]);
+
+  // Cleanup in-flight tween on unmount
+  useEffect(() => {
+    return () => {
+      if (activeTweenRef.current) {
+        activeTweenRef.current.destroy();
+      }
+    };
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Drag-and-drop from palette onto canvas div
@@ -515,19 +531,24 @@ export default function CircuitCanvas({
   // Drag-to-move placed gates
   // ---------------------------------------------------------------------------
 
-  // Wrapper Groups are positioned at (colX(col), wireY(firstQubit)).
-  // dragBoundFunc receives the proposed absolute position and snaps it to grid.
-  const gateDragBound = useCallback((pos: { x: number; y: number }) => {
-    const col   = Math.round((pos.x - WIRE_START_X - COL_WIDTH / 2) / COL_WIDTH);
-    const qubit = Math.round((pos.y - TOP_PADDING) / ROW_HEIGHT);
-    const clampedCol   = Math.max(0, Math.min(MAX_COLS - 1, col));
-    const clampedQubit = Math.max(0, Math.min(numQubits - 1, qubit));
-    return { x: colX(clampedCol), y: wireY(clampedQubit) };
-  }, [numQubits]);
-
   const handleGateDragStart = useCallback(
-    (gateId: string) => () => {
+    (gateId: string) => (e: Konva.KonvaEventObject<DragEvent>) => {
+      // Cancel any in-flight snap tween from a previous drag
+      if (activeTweenRef.current) {
+        activeTweenRef.current.destroy();
+        activeTweenRef.current = null;
+      }
       setDraggingId(gateId);
+      document.body.style.cursor = 'grabbing';
+
+      // Lift effect: scale up the dragged group
+      const node = e.target;
+      node.to({
+        scaleX: 1.25,
+        scaleY: 1.25,
+        duration: 0.12,
+        easing: Konva.Easings.EaseOut,
+      });
     },
     [],
   );
@@ -545,42 +566,72 @@ export default function CircuitCanvas({
     (gate: CircuitGate) => (e: Konva.KonvaEventObject<DragEvent>) => {
       const node = e.target;
       setDropHighlight(null);
-      setDraggingId(null);
-      // node.x()/y() is the absolute position of the wrapper Group after drag
+      document.body.style.cursor = '';
+
       const snapped = snapToGrid(node.x(), node.y(), numQubits);
-      // Reset Konva node to original position so React stays in control
-      node.position({ x: colX(gate.column), y: wireY(gate.targetQubits[0]) });
-      if (!snapped) return;
 
-      const normalizedGateId = normalizeGateId(gate.gateId);
-      const numQ = gateNumQubits(normalizedGateId);
+      // Compute snap destination (falls back to origin if out-of-bounds)
+      const destX = snapped ? colX(snapped.col)   : colX(gate.column);
+      const destY = snapped ? wireY(snapped.qubit) : wireY(gate.targetQubits[0]);
 
-      if (numQ === 1) {
-        if (snapped.col === gate.column && snapped.qubit === gate.targetQubits[0]) return;
-        const moved: CircuitGate = {
-          ...gate,
-          column: snapped.col,
-          targetQubits: [snapped.qubit],
-        };
-        const otherGates = circuit.gates.filter((g) => g.id !== gate.id);
-        if (!canPlaceGate({ ...circuit, gates: otherGates }, moved)) return;
-        onCircuitChange({ ...circuit, gates: [...otherGates, moved] });
-      } else {
-        const qubitDelta = snapped.qubit - gate.targetQubits[0];
-        const newQubits = gate.targetQubits.map((q) => q + qubitDelta);
-        if (newQubits.some((q) => q < 0 || q >= numQubits)) return;
-        if (snapped.col === gate.column && qubitDelta === 0) return;
-        const moved: CircuitGate = {
-          ...gate,
-          column: snapped.col,
-          targetQubits: newQubits,
-        };
-        const otherGates = circuit.gates.filter((g) => g.id !== gate.id);
-        if (!canPlaceGate({ ...circuit, gates: otherGates }, moved)) return;
-        onCircuitChange({ ...circuit, gates: [...otherGates, moved] });
+      // Resolve the new gate state now so the tween closure is stable
+      let movedGate: CircuitGate | null = null;
+      if (snapped) {
+        const normalizedGateId = normalizeGateId(gate.gateId);
+        const numQ = gateNumQubits(normalizedGateId);
+        if (numQ === 1) {
+          if (snapped.col !== gate.column || snapped.qubit !== gate.targetQubits[0]) {
+            const candidate: CircuitGate = { ...gate, column: snapped.col, targetQubits: [snapped.qubit] };
+            const others = circuit.gates.filter((g) => g.id !== gate.id);
+            if (canPlaceGate({ ...circuit, gates: others }, candidate)) movedGate = candidate;
+          }
+        } else {
+          const delta = snapped.qubit - gate.targetQubits[0];
+          const newQubits = gate.targetQubits.map((q) => q + delta);
+          if (!newQubits.some((q) => q < 0 || q >= numQubits) &&
+              (snapped.col !== gate.column || delta !== 0)) {
+            const candidate: CircuitGate = { ...gate, column: snapped.col, targetQubits: newQubits };
+            const others = circuit.gates.filter((g) => g.id !== gate.id);
+            if (canPlaceGate({ ...circuit, gates: others }, candidate)) movedGate = candidate;
+          }
+        }
       }
-      setSelectedId(null);
-      setPendingGate(null);
+
+      // Animate: snap to grid position + scale down (land effect)
+      const tween = new Konva.Tween({
+        node,
+        x: destX,
+        y: destY,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 0.18,
+        easing: Konva.Easings.EaseOut,
+        onFinish() {
+          // Guard: bail if this tween was superseded by a new drag
+          if (activeTweenRef.current !== tween) return;
+          tween.destroy();
+          activeTweenRef.current = null;
+
+          // Reset Konva node so React stays in control
+          const finalX = movedGate ? colX(movedGate.column)           : colX(gate.column);
+          const finalY = movedGate ? wireY(movedGate.targetQubits[0]) : wireY(gate.targetQubits[0]);
+          node.position({ x: finalX, y: finalY });
+          node.scaleX(1);
+          node.scaleY(1);
+
+          // Commit to React state using live circuit ref
+          if (movedGate) {
+            const liveCircuit = circuitRef.current;
+            const others = liveCircuit.gates.filter((g) => g.id !== gate.id);
+            onCircuitChange({ ...liveCircuit, gates: [...others, movedGate] });
+            setSelectedId(null);
+            setPendingGate(null);
+          }
+          setDraggingId(null);
+        },
+      });
+      activeTweenRef.current = tween;
+      tween.play();
     },
     [circuit, numQubits, onCircuitChange],
   );
@@ -768,7 +819,6 @@ export default function CircuitCanvas({
             const dimmed = draggingId != null && !beingDragged;
             const dragProps = {
               draggable: isDraggable,
-              dragBoundFunc: gateDragBound,
               onDragStart: handleGateDragStart(gate.id),
               onDragMove: handleGateDragMove,
               onDragEnd: handleGateDragEnd(gate),
