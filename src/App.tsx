@@ -467,25 +467,16 @@ export default function App() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div
+          <img
+            src="/logo-header.png"
+            alt="JokoQuantum logo"
+            width={28}
+            height={28}
             style={{
-              width: 28,
-              height: 28,
-              borderRadius: '6px',
-              background: 'linear-gradient(135deg, #4FC3F7 0%, #1a6adc 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '14px',
-              fontWeight: 900,
-              color: '#fff',
-              fontFamily: 'monospace',
-              letterSpacing: '-1px',
-              boxShadow: '0 0 12px #4FC3F760',
+              borderRadius: '4px',
+              filter: 'drop-shadow(0 0 8px #4FC3F760)',
             }}
-          >
-            JQ
-          </div>
+          />
           <span
             style={{
               fontSize: '18px',
