@@ -378,6 +378,9 @@ export default function CircuitCanvas({
   // Drop highlight cell
   const [dropHighlight, setDropHighlight] = useState<{ col: number; qubit: number } | null>(null);
 
+  // Gate currently being dragged
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
   // Resize observer
   useEffect(() => {
     const el = containerRef.current;
@@ -507,6 +510,92 @@ export default function CircuitCanvas({
     onCircuitChange({ ...circuit, gates: [...circuit.gates, newGate] });
     setPendingGate(null);
   }
+
+  // ---------------------------------------------------------------------------
+  // Drag-to-move placed gates
+  // ---------------------------------------------------------------------------
+
+  // Wrapper Groups are positioned at (colX(col), wireY(firstQubit)).
+  // dragBoundFunc receives the proposed absolute position and snaps it to grid.
+  const gateDragBound = useCallback((pos: { x: number; y: number }) => {
+    const col   = Math.round((pos.x - WIRE_START_X - COL_WIDTH / 2) / COL_WIDTH);
+    const qubit = Math.round((pos.y - TOP_PADDING) / ROW_HEIGHT);
+    const clampedCol   = Math.max(0, Math.min(MAX_COLS - 1, col));
+    const clampedQubit = Math.max(0, Math.min(numQubits - 1, qubit));
+    return { x: colX(clampedCol), y: wireY(clampedQubit) };
+  }, [numQubits]);
+
+  const handleGateDragStart = useCallback(
+    (gateId: string) => () => {
+      setDraggingId(gateId);
+    },
+    [],
+  );
+
+  const handleGateDragMove = useCallback(
+    (e: Konva.KonvaEventObject<DragEvent>) => {
+      const node = e.target;
+      const cell = snapToGrid(node.x(), node.y(), numQubits);
+      setDropHighlight(cell);
+    },
+    [numQubits],
+  );
+
+  const handleGateDragEnd = useCallback(
+    (gate: CircuitGate) => (e: Konva.KonvaEventObject<DragEvent>) => {
+      const node = e.target;
+      setDropHighlight(null);
+      setDraggingId(null);
+      // node.x()/y() is the absolute position of the wrapper Group after drag
+      const snapped = snapToGrid(node.x(), node.y(), numQubits);
+      // Reset Konva node to original position so React stays in control
+      node.position({ x: colX(gate.column), y: wireY(gate.targetQubits[0]) });
+      if (!snapped) return;
+
+      const normalizedGateId = normalizeGateId(gate.gateId);
+      const numQ = gateNumQubits(normalizedGateId);
+
+      if (numQ === 1) {
+        if (snapped.col === gate.column && snapped.qubit === gate.targetQubits[0]) return;
+        const moved: CircuitGate = {
+          ...gate,
+          column: snapped.col,
+          targetQubits: [snapped.qubit],
+        };
+        const otherGates = circuit.gates.filter((g) => g.id !== gate.id);
+        if (!canPlaceGate({ ...circuit, gates: otherGates }, moved)) return;
+        onCircuitChange({ ...circuit, gates: [...otherGates, moved] });
+      } else {
+        const qubitDelta = snapped.qubit - gate.targetQubits[0];
+        const newQubits = gate.targetQubits.map((q) => q + qubitDelta);
+        if (newQubits.some((q) => q < 0 || q >= numQubits)) return;
+        if (snapped.col === gate.column && qubitDelta === 0) return;
+        const moved: CircuitGate = {
+          ...gate,
+          column: snapped.col,
+          targetQubits: newQubits,
+        };
+        const otherGates = circuit.gates.filter((g) => g.id !== gate.id);
+        if (!canPlaceGate({ ...circuit, gates: otherGates }, moved)) return;
+        onCircuitChange({ ...circuit, gates: [...otherGates, moved] });
+      }
+      setSelectedId(null);
+      setPendingGate(null);
+    },
+    [circuit, numQubits, onCircuitChange],
+  );
+
+  const handleGateMouseEnter = useCallback(() => {
+    if (!disabled && !pendingGate) {
+      document.body.style.cursor = 'grab';
+    }
+  }, [disabled, pendingGate]);
+
+  const handleGateMouseLeave = useCallback(() => {
+    document.body.style.cursor = '';
+  }, []);
+
+  const isDraggable = !disabled && !pendingGate;
 
   // ---------------------------------------------------------------------------
   // Derived layout values
@@ -674,35 +763,121 @@ export default function CircuitCanvas({
                 gates: circuit.gates.filter((g) => g.id !== gate.id),
               });
 
+            // Shared drag wrapper props
+            const beingDragged = draggingId === gate.id;
+            const dimmed = draggingId != null && !beingDragged;
+            const dragProps = {
+              draggable: isDraggable,
+              dragBoundFunc: gateDragBound,
+              onDragStart: handleGateDragStart(gate.id),
+              onDragMove: handleGateDragMove,
+              onDragEnd: handleGateDragEnd(gate),
+              onMouseEnter: handleGateMouseEnter,
+              onMouseLeave: handleGateMouseLeave,
+              opacity: dimmed ? 0.3 : 1,
+            };
+
             if (normalizedGateId === 'M') {
               const qubit = gate.targetQubits[0];
               return (
-                <MeasureGateShape
-                  key={gate.id}
-                  x={x}
-                  y={wireY(qubit)}
-                  color={color}
-                  selected={selected}
-                  highlighted={highlighted}
-                  onClick={() => {
-                    if (!pendingGate && !disabled) {
-                      setSelectedId(prev => prev === gate.id ? null : gate.id);
-                    }
-                  }}
-                  onRemove={() => {
-                    if (!disabled) removeGate();
-                  }}
-                />
+                <Group key={gate.id} x={x} y={wireY(qubit)} {...dragProps}>
+                  <MeasureGateShape
+                    x={0}
+                    y={0}
+                    color={color}
+                    selected={selected}
+                    highlighted={highlighted}
+                    onClick={() => {
+                      if (!pendingGate && !disabled) {
+                        setSelectedId(prev => prev === gate.id ? null : gate.id);
+                      }
+                    }}
+                    onRemove={() => {
+                      if (!disabled) removeGate();
+                    }}
+                  />
+                </Group>
               );
             }
 
             if (numQ === 1) {
               const qubit = gate.targetQubits[0];
               return (
+                <Group key={gate.id} x={x} y={wireY(qubit)} {...dragProps}>
+                  <SingleGateShape
+                    x={0}
+                    y={0}
+                    symbol={gateDisplaySymbol(normalizedGateId)}
+                    color={color}
+                    selected={selected}
+                    highlighted={highlighted}
+                    onClick={() => {
+                      if (!pendingGate && !disabled) {
+                        setSelectedId(prev => prev === gate.id ? null : gate.id);
+                      }
+                    }}
+                    onRemove={() => {
+                      if (!disabled) removeGate();
+                    }}
+                  />
+                </Group>
+              );
+            }
+
+            if (normalizedGateId === 'CNOT' && gate.targetQubits.length === 2) {
+              const [ctrl, tgt] = gate.targetQubits;
+              return (
+                <Group key={gate.id} x={x} y={wireY(ctrl)} {...dragProps}>
+                  <CnotShape
+                    controlX={0}
+                    controlY={0}
+                    targetX={0}
+                    targetY={wireY(tgt) - wireY(ctrl)}
+                    color={color}
+                    selected={selected}
+                    highlighted={highlighted}
+                    onClick={() => {
+                      if (!pendingGate && !disabled) {
+                        setSelectedId(prev => prev === gate.id ? null : gate.id);
+                      }
+                    }}
+                    onRemove={() => {
+                      if (!disabled) removeGate();
+                    }}
+                  />
+                </Group>
+              );
+            }
+
+            if (normalizedGateId === 'SWAP' && gate.targetQubits.length === 2) {
+              const [q0, q1] = gate.targetQubits;
+              return (
+                <Group key={gate.id} x={x} y={wireY(q0)} {...dragProps}>
+                  <SwapShape
+                    q0x={0} q0y={0}
+                    q1x={0} q1y={wireY(q1) - wireY(q0)}
+                    color={color}
+                    selected={selected}
+                    highlighted={highlighted}
+                    onClick={() => {
+                      if (!pendingGate && !disabled) {
+                        setSelectedId(prev => prev === gate.id ? null : gate.id);
+                      }
+                    }}
+                    onRemove={() => {
+                      if (!disabled) removeGate();
+                    }}
+                  />
+                </Group>
+              );
+            }
+
+            // Generic multi-qubit fallback
+            return gate.targetQubits.map((q, idx) => (
+              <Group key={`${gate.id}-${idx}`} x={x} y={wireY(q)} {...dragProps}>
                 <SingleGateShape
-                  key={gate.id}
-                  x={x}
-                  y={wireY(qubit)}
+                  x={0}
+                  y={0}
                   symbol={gateDisplaySymbol(normalizedGateId)}
                   color={color}
                   selected={selected}
@@ -716,74 +891,7 @@ export default function CircuitCanvas({
                     if (!disabled) removeGate();
                   }}
                 />
-              );
-            }
-
-            if (normalizedGateId === 'CNOT' && gate.targetQubits.length === 2) {
-              const [ctrl, tgt] = gate.targetQubits;
-              return (
-                <CnotShape
-                  key={gate.id}
-                  controlX={x}
-                  controlY={wireY(ctrl)}
-                  targetX={x}
-                  targetY={wireY(tgt)}
-                  color={color}
-                  selected={selected}
-                  highlighted={highlighted}
-                  onClick={() => {
-                    if (!pendingGate && !disabled) {
-                      setSelectedId(prev => prev === gate.id ? null : gate.id);
-                    }
-                  }}
-                  onRemove={() => {
-                    if (!disabled) removeGate();
-                  }}
-                />
-              );
-            }
-
-            if (normalizedGateId === 'SWAP' && gate.targetQubits.length === 2) {
-              const [q0, q1] = gate.targetQubits;
-              return (
-                <SwapShape
-                  key={gate.id}
-                  q0x={x} q0y={wireY(q0)}
-                  q1x={x} q1y={wireY(q1)}
-                  color={color}
-                  selected={selected}
-                  highlighted={highlighted}
-                  onClick={() => {
-                    if (!pendingGate && !disabled) {
-                      setSelectedId(prev => prev === gate.id ? null : gate.id);
-                    }
-                  }}
-                  onRemove={() => {
-                    if (!disabled) removeGate();
-                  }}
-                />
-              );
-            }
-
-            // Generic multi-qubit fallback
-            return gate.targetQubits.map((q, idx) => (
-              <SingleGateShape
-                key={`${gate.id}-${idx}`}
-                x={x}
-                y={wireY(q)}
-                symbol={gateDisplaySymbol(normalizedGateId)}
-                color={color}
-                selected={selected}
-                highlighted={highlighted}
-                onClick={() => {
-                  if (!pendingGate && !disabled) {
-                    setSelectedId(prev => prev === gate.id ? null : gate.id);
-                  }
-                }}
-                onRemove={() => {
-                  if (!disabled) removeGate();
-                }}
-              />
+              </Group>
             ));
           })}
 
