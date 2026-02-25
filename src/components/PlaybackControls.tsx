@@ -110,51 +110,6 @@ function IconBtn({
   );
 }
 
-function ProgressTimeline({ currentStep, totalSteps, isPlaying }: { currentStep: number; totalSteps: number; isPlaying: boolean }) {
-  if (totalSteps === 0) return null;
-
-  const progress = totalSteps > 0 ? Math.max(0, (currentStep + 1) / totalSteps) * 100 : 0;
-
-  return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '2px',
-      background: '#1e2a3a',
-      overflow: 'hidden',
-    }}>
-      <div style={{
-        height: '100%',
-        width: `${progress}%`,
-        background: isPlaying
-          ? 'linear-gradient(90deg, #3a7bd5, #4FC3F7)'
-          : '#3a7bd5',
-        borderRadius: '0 1px 1px 0',
-        transition: 'width 0.3s ease',
-        boxShadow: progress > 0 ? '0 0 8px #4FC3F740' : 'none',
-      }} />
-      {/* Step markers */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '100%',
-        display: 'flex',
-      }}>
-        {Array.from({ length: totalSteps }, (_, i) => (
-          <div key={i} style={{
-            flex: 1,
-            borderRight: i < totalSteps - 1 ? '1px solid #0d111740' : 'none',
-          }} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function PlaybackControls({
   isPlaying,
   currentStep,
