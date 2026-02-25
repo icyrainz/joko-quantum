@@ -131,8 +131,10 @@ export default function PlaybackControls({
       style={{
         position: 'absolute',
         bottom: 12,
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 0,
+        right: 0,
+        marginInline: 'auto',
+        width: 'fit-content',
         height: '46px',
         background: 'linear-gradient(180deg, #182840e6 0%, #16213eee 100%)',
         backdropFilter: 'blur(12px)',
