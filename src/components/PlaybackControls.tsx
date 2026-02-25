@@ -174,33 +174,37 @@ export default function PlaybackControls({
   return (
     <div
       style={{
-        height: '58px',
-        background: 'linear-gradient(180deg, #182840 0%, #16213e 100%)',
-        borderTop: '1px solid #1e2a3a',
+        position: 'absolute',
+        bottom: 12,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        height: '46px',
+        background: 'linear-gradient(180deg, #182840e6 0%, #16213eee 100%)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid #1e2a3a',
+        borderRadius: '14px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
-        padding: '0 24px',
+        padding: '0 20px',
         flexShrink: 0,
-        position: 'relative',
+        zIndex: 10,
+        boxShadow: '0 4px 24px #00000060',
         animation: 'slideInUp 0.4s ease-out',
       }}
     >
-      <ProgressTimeline currentStep={currentStep} totalSteps={totalSteps} isPlaying={isPlaying} />
-
       {/* Left: step counter */}
       <div style={{
-        position: 'absolute',
-        left: '20px',
         fontSize: '11px',
         fontFamily: 'var(--qf-font-mono)',
         fontWeight: 500,
         color: '#3a5a78',
-        minWidth: '80px',
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
+        marginRight: '8px',
       }}>
         {totalSteps > 0 ? (
           <>
@@ -230,11 +234,10 @@ export default function PlaybackControls({
 
       {/* Right: speed control */}
       <div style={{
-        position: 'absolute',
-        right: '20px',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
+        marginLeft: '8px',
       }}>
         <span style={{ fontSize: '10px', color: '#2a4060', fontWeight: 500, whiteSpace: 'nowrap', fontFamily: 'var(--qf-font-mono)' }}>
           SPEED

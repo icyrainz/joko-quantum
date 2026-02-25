@@ -628,18 +628,32 @@ export default function App() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <GatePalette disabled={isPlaying} />
 
-        <CircuitCanvas
-          circuit={circuit}
-          onCircuitChange={updateCircuit}
-          currentStep={highlightColumn}
-          numQubits={numQubits}
-          disabled={isPlaying}
-          animationEnabled={true}
-          targetStep={targetStep}
-          executionSteps={executionSteps}
-          speed={speed}
-          onStepAnimationComplete={handleStepAnimationComplete}
-        />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+          <CircuitCanvas
+            circuit={circuit}
+            onCircuitChange={updateCircuit}
+            currentStep={highlightColumn}
+            numQubits={numQubits}
+            disabled={isPlaying}
+            animationEnabled={true}
+            targetStep={targetStep}
+            executionSteps={executionSteps}
+            speed={speed}
+            onStepAnimationComplete={handleStepAnimationComplete}
+          />
+
+          <PlaybackControls
+            isPlaying={isPlaying}
+            currentStep={currentStep}
+            totalSteps={executionSteps.length}
+            speed={speed}
+            onStep={handleStep}
+            onStepBack={handleStepBack}
+            onPlayPause={handlePlayPause}
+            onReset={handleReset}
+            onSpeedChange={setSpeed}
+          />
+        </div>
 
         <StateInspector
           state={displayState}
@@ -673,18 +687,6 @@ export default function App() {
           onSelectLesson={handleLessonSelect}
         />
       </div>
-
-      <PlaybackControls
-        isPlaying={isPlaying}
-        currentStep={currentStep}
-        totalSteps={executionSteps.length}
-        speed={speed}
-        onStep={handleStep}
-        onStepBack={handleStepBack}
-        onPlayPause={handlePlayPause}
-        onReset={handleReset}
-        onSpeedChange={setSpeed}
-      />
     </div>
   );
 }
