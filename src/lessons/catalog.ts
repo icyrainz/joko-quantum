@@ -3,6 +3,10 @@ import { lesson2 } from './lesson2-hadamard-superposition';
 import { lesson3 } from './lesson3-phase';
 import { lesson4 } from './lesson4-entanglement';
 import { lesson5 } from './lesson5-teleportation';
+import { lesson6 } from './lesson6-measurement';
+import { lesson7 } from './lesson7-superdense-coding';
+import { lesson8 } from './lesson8-deutsch-algorithm';
+import { lesson9 } from './lesson9-ghz-state';
 import type { Lesson, LessonSummary } from './types';
 
 export const DEFAULT_LESSON_ID = 'lesson1';
@@ -49,6 +53,38 @@ export const LESSON_CATALOG: LessonSummary[] = [
     prerequisites: ['lesson4'],
     totalSteps: 12,
   },
+  {
+    id: 'lesson6',
+    title: 'Measurement and the Born Rule',
+    description: 'Understand the precise rules governing quantum measurement — the bridge between quantum states and classical outcomes.',
+    estimatedMinutes: 20,
+    prerequisites: ['lesson5'],
+    totalSteps: 10,
+  },
+  {
+    id: 'lesson7',
+    title: 'Superdense Coding',
+    description: 'Send two classical bits of information by transmitting just one qubit — using shared entanglement.',
+    estimatedMinutes: 22,
+    prerequisites: ['lesson6'],
+    totalSteps: 10,
+  },
+  {
+    id: 'lesson8',
+    title: "Deutsch's Algorithm",
+    description: 'Build the first quantum algorithm — a provable speedup over any classical approach using interference and phase kickback.',
+    estimatedMinutes: 25,
+    prerequisites: ['lesson7'],
+    totalSteps: 10,
+  },
+  {
+    id: 'lesson9',
+    title: 'GHZ State and Three-Qubit Entanglement',
+    description: 'Create the GHZ state — three-qubit entanglement that reveals the strongest form of quantum nonlocality.',
+    estimatedMinutes: 22,
+    prerequisites: ['lesson8'],
+    totalSteps: 10,
+  },
 ];
 
 export async function loadLessonById(id: string): Promise<Lesson | null> {
@@ -58,6 +94,10 @@ export async function loadLessonById(id: string): Promise<Lesson | null> {
     lesson3,
     lesson4,
     lesson5,
+    lesson6,
+    lesson7,
+    lesson8,
+    lesson9,
   };
   return lessons[id] ?? null;
 }
