@@ -43,7 +43,7 @@ export const LESSON_CATALOG: LessonSummary[] = [
     description: 'Expand to two qubits, learn the CNOT gate, and create entangled Bell states.',
     estimatedMinutes: 25,
     prerequisites: ['lesson3'],
-    totalSteps: 10,
+    totalSteps: 11,
   },
   {
     id: 'lesson5',
