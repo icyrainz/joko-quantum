@@ -13,7 +13,7 @@ export const lesson1: Lesson = {
 
 This simulator will guide you through the core ideas of quantum computing by letting you build and run real quantum circuits — no physics degree required.
 
-Over the next five lessons you will go from "what even is a qubit?" all the way to **quantum teleportation**, one of the most counterintuitive results in all of physics. Along the way you will see actual mathematics, debunk popular misconceptions, and interact with a working quantum state engine.
+Over nine lessons you will go from "what even is a qubit?" all the way to **the GHZ theorem** — one of the most striking demonstrations of quantum nonlocality ever devised. Along the way you will see actual mathematics, debunk popular misconceptions, and interact with a working quantum state engine.
 
 **What this lesson covers:** We start at the very beginning — classical bits versus quantum bits. By the end you will have placed your first gate, watched it transform a quantum state, and understood why that transformation is both trivially similar to and deeply different from what a classical computer does.
 

@@ -313,7 +313,7 @@ The **SWAP gate** is another useful two-qubit gate — it exchanges the states o
 
 **Entanglement does NOT allow faster-than-light communication** — the no-communication theorem forbids it. Alice's measurement result is random; information still travels at light speed.
 
-In **Lesson 5** we put everything together for the crown jewel: quantum teleportation.
+In the **next lesson** we put everything together for the crown jewel: quantum teleportation.
 
 ---
 

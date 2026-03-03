@@ -335,45 +335,34 @@ Multi-qubit systems live in tensor product spaces. The CNOT gate entangles qubit
 **Lesson 5 — Quantum Teleportation:**
 The no-cloning theorem forbids copying unknown states. Teleportation uses entanglement + 2 classical bits to move a quantum state. The protocol works by encoding the state into correlations, measuring to fix the correction, and applying classical corrections on the receiving end.
 
-You have seen the mathematical foundations of quantum computing. The path forward is algorithms, error correction, and hardware.`,
+In the next lessons you will formalize measurement, explore superdense coding, see your first quantum algorithm, and scale up to three-qubit entanglement.`,
       action: {
         type: 'read',
         description: 'Read the complete course summary. You have covered the foundational concepts of quantum computing.',
       },
     },
     {
-      title: 'Further Reading & What to Explore Next',
-      content: `## Further Reading & Next Steps
+      title: 'Further Reading & What\u2019s Next',
+      content: `## Further Reading
 
-This simulator and these five lessons are the beginning. Here is where to go deeper:
-
----
-
-## Quantum Teleportation References
+Here are some references for the teleportation protocol:
 
 - [Bennett et al. 1993 — "Teleporting an Unknown Quantum State via Dual Classical and Einstein-Podolsky-Rosen Channels"](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.70.1895) — The original paper. Remarkably accessible. Worth reading the abstract and conclusion even if the full math is challenging.
 - [IBM Quantum Lab: Quantum Teleportation Tutorial](https://learning.quantum.ibm.com/tutorial/quantum-teleportation) — Runnable implementation in Qiskit, with circuit diagrams and state tracking.
 
-## Going Deeper into Quantum Computing
+---
 
-- **Scott Aaronson, "Quantum Computing Since Democritus"** — One of the best books on quantum computing for the mathematically literate non-physicist. Witty, rigorous, and broad in scope. Covers complexity theory, algorithms, and the conceptual foundations.
-- **Nielsen & Chuang, "Quantum Computation and Quantum Information"** — The definitive graduate textbook. Chapter 1 for foundations, Chapters 5–6 for algorithms (QFT, Shor, Grover), Chapter 10 for error correction.
-- [Qiskit Textbook (qiskit.org/learn)](https://qiskit.org/learn) — Free, comprehensive, runnable. Covers everything from beginner to advanced.
+## What's Next
 
-## Running Real Quantum Hardware
+In the remaining lessons you will:
 
-- [IBM Quantum (quantum.ibm.com)](https://quantum.ibm.com) — Run circuits on real quantum hardware for free. Start with the basic examples and work up to the Qiskit patterns.
-- [Google Quantum AI](https://quantumai.google) — Home of Cirq and the 2019 "quantum supremacy" experiment.
-
-## Conceptual and Philosophical Depth
-
-- [Quantum Country](https://quantum.country/) — Spaced-repetition essays by Nielsen and Matuschak. Excellent for cementing what you have learned.
-- **David Deutsch, "The Fabric of Reality"** — Philosophical and visionary. Argues for the many-worlds interpretation and its implications for computation.
-
-You are now equipped to read primary sources, follow tutorials, and use real quantum hardware. The rest is practice.`,
+- **Lesson 6 — Measurement:** Formalize what measurement really does, explore measurement bases, and understand the no-cloning theorem from a measurement perspective.
+- **Lesson 7 — Superdense Coding:** The dual of teleportation — send 2 classical bits using 1 qubit and shared entanglement.
+- **Lesson 8 — Deutsch's Algorithm:** Your first quantum algorithm — a problem a quantum computer solves in one query that classically requires two.
+- **Lesson 9 — The GHZ State:** Scale to three qubits and see the strongest proof of quantum nonlocality — no inequalities, no statistics, just one measurement.`,
       action: {
         type: 'read',
-        description: 'Explore the reading links. You have completed all five lessons. Well done.',
+        description: 'Explore the reading links, then continue to Lesson 6.',
       },
     },
   ],
